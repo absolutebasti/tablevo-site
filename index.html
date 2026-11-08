@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#0A0908">
 <title>Tablevo – Reservierung, Tischplan und Lager für Restaurants</title>
 <meta name="description" content="Eigener Buchungslink statt Reservierungsportal, Tische live im Blick und das Lager ohne Zettel. Für iPad und iPhone, bald im App Store.">
 <meta property="og:type" content="website">
@@ -16,14 +16,15 @@
 <link rel="preload" href="fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Mobile first: die Regeln unten sind das Handy, größere Layouts kommen über min-width dazu (600, 960).
-   Farben und Schrift wie in der App (lib/core/theme.dart, docs/design.md).
+   Die Seite ist dunkel (Sebastian, 08.11.2026), die App bleibt hell: Die nachgezeichneten App-Ansichten bekommen
+   deshalb über .light wieder die hellen Farben aus der App (lib/core/theme.dart). Pastell nur als kleiner Akzent.
    Die App-Ansichten sind nachgezeichnet (HTML/CSS) und animiert, keine Screenshots: Sie bleiben scharf und
    hängen nicht am Zwischenstand der App. Inhalte sind Beispiele. Figuren (img/ill) kommen aus assets/icons
-   und liegen nie über einer App-Ansicht. Essensfotos (img/food) liegen nur als Hintergrund hinter den
-   App-Ausschnitten, ohne Gerichtnamen: Wir werben für die App, nicht für ein Restaurant. */
+   und liegen nie über einer App-Ansicht. Essensfotos (img/food) liegen nur gedimmt im Hintergrund, ohne
+   Gerichtnamen: Wir werben für die App, nicht für ein Restaurant. */
 @font-face{font-family:"Jakarta";font-weight:200 800;font-display:swap;src:url(fonts/PlusJakartaSans.woff2) format("woff2")}
 :root{
-  --bg:#FFFFFF;--surface:#F6F5F2;--surface2:#EDEBE6;--line:#E6E3DD;--text:#151515;--muted:#6B675F;
+  --bg:#0A0908;--surface:#161412;--surface2:#211E1B;--line:rgba(255,255,255,.1);--text:#F5F3EF;--muted:#A39D93;
   --mint:#D3F4E1;--mint-ink:#0D5A35;--butter:#FFEFB8;--butter-ink:#654A00;--peach:#FFDCCC;--peach-ink:#7C3216;
   --blush:#FFD5D5;--blush-ink:#8A1B1B;--lavender:#E5DFFF;--lavender-ink:#3A2B8C;--sky:#D8EBFF;--sky-ink:#134776;
   --rose:#FCDCEA;--rose-ink:#7A1F4D;
@@ -31,6 +32,8 @@
   --ease:cubic-bezier(.2,.8,.2,1)
 }
 *{box-sizing:border-box}
+/* App-Ansichten: helle Farben wie in der App */
+.light,.ipad .screen,.w,.pdf,.mail{--bg:#fff;--surface:#F6F5F2;--surface2:#EDEBE6;--line:#E6E3DD;--text:#151515;--muted:#6B675F;color:var(--text)}
 html{background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-wrap:break-word;overflow-x:hidden}
 img{display:block;max-width:100%;height:auto}
@@ -52,8 +55,8 @@ section{padding:80px 0}
 .rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
 
 /* Knöpfe */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 24px;border-radius:16px;background:var(--text);color:#fff;font-weight:700;font-size:16px;text-decoration:none;white-space:nowrap;transition:transform .2s var(--ease),background .2s ease}
-.btn:hover{background:#000;transform:translateY(-2px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 24px;border-radius:16px;background:#fff;color:#0A0908;font-weight:700;font-size:16px;text-decoration:none;white-space:nowrap;transition:transform .2s var(--ease),background .2s ease}
+.btn:hover{background:#E9E6E0;transform:translateY(-2px)}
 /* „Bald im App Store“: eigenes Etikett, nicht Apples Abzeichen (das gibt es erst, wenn die App im Store ist). */
 .soon{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 16px 0 12px;border-radius:14px;background:var(--surface);color:var(--text)}
 .soon svg{width:26px;height:26px;flex:none}
@@ -63,7 +66,7 @@ section{padding:80px 0}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Oberer Balken */
-.nav{position:fixed;top:0;left:0;right:0;z-index:30;padding-top:env(safe-area-inset-top);background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 1px 0 transparent;transition:box-shadow .2s ease}
+.nav{position:fixed;top:0;left:0;right:0;z-index:30;padding-top:env(safe-area-inset-top);background:rgba(10,9,8,.72);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 1px 0 transparent;transition:box-shadow .2s ease}
 .nav.solid{box-shadow:0 1px 0 var(--line)}
 .bar{display:flex;align-items:center;gap:12px;height:var(--bar)}
 .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
@@ -76,7 +79,12 @@ section{padding:80px 0}
 .nav .btn{margin-left:auto;min-height:40px;padding:0 16px;border-radius:12px;font-size:15px}
 
 /* Hero */
-.hero{padding:calc(var(--bar) + 28px + env(safe-area-inset-top)) 0 24px;overflow:hidden}
+.hero{position:relative;isolation:isolate;padding:calc(var(--bar) + 28px + env(safe-area-inset-top)) 0 24px;overflow:hidden}
+/* gedimmtes Foto hinter dem ganzen Einstieg, läuft oben und unten ins Schwarze aus */
+.hero-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:50% 80%;opacity:.58;transform:scale(1.06);animation:settle 3s var(--ease) forwards}
+@keyframes settle{to{transform:none}}
+.hero-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,var(--bg) 0,rgba(10,9,8,.35) 30%,rgba(10,9,8,.35) 65%,var(--bg) 100%),linear-gradient(to right,rgba(10,9,8,.85),transparent 60%)}
 .hero-grid{display:grid;gap:40px;align-items:center}
 .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700}
 .pill.mint{background:var(--mint);color:var(--mint-ink)}
@@ -86,16 +94,9 @@ section{padding:80px 0}
 .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:30px}
 .devices{font-size:14px;color:var(--muted);margin-top:18px;display:flex;align-items:center;gap:8px}
 .devices svg{width:18px;height:18px;flex:none}
-/* weicher, langsam wandernder Farbhintergrund hinter dem iPad */
-.glow{position:absolute;inset:-6% -4%;z-index:0;border-radius:48px;background:
-  radial-gradient(40% 50% at 20% 30%,var(--mint) 0,transparent 70%),
-  radial-gradient(40% 50% at 80% 25%,var(--peach) 0,transparent 70%),
-  radial-gradient(45% 55% at 60% 85%,var(--lavender) 0,transparent 70%);
-  filter:blur(8px);animation:drift 16s ease-in-out infinite alternate}
-@keyframes drift{to{transform:translate(2%,-2%) scale(1.04)}}
 
 /* iPad-Rahmen: Bildschirm 1180 × 820, wird per --s auf die Breite skaliert. */
-.ipad{position:relative;z-index:1;width:100%;padding:clamp(8px,1.4vw,16px);border-radius:clamp(22px,3vw,40px);background:#151515;box-shadow:0 50px 100px -40px rgba(21,21,21,.5),inset 0 0 0 2px #2c2c2c}
+.ipad{position:relative;z-index:1;width:100%;padding:clamp(8px,1.4vw,16px);border-radius:clamp(22px,3vw,40px);background:#1A1917;box-shadow:0 60px 120px -40px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.08),inset 0 0 0 2px #34322F}
 .ipad .screen{position:relative;aspect-ratio:1180/820;border-radius:clamp(14px,1.8vw,26px);overflow:hidden;background:#fff}
 .ipad .ui{position:absolute;left:0;top:0;width:1180px;height:820px;transform-origin:0 0;transform:scale(var(--s,.3))}
 .hero-visual{position:relative}
@@ -176,9 +177,9 @@ section{padding:80px 0}
 .stagebox.photo{background:#0E0C0B}
 .stagebox .bg{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 2.8s var(--ease)}
 .stagebox.in .bg{transform:none}
-.stagebox.photo:after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 50% 50%,rgba(10,9,8,.35),transparent 100%)}
+.stagebox.photo:after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);background:radial-gradient(60% 55% at 50% 50%,rgba(10,9,8,.4),transparent 100%)}
 .stagebox.photo>:not(.bg){z-index:1}
-.w{position:relative;width:100%;max-width:400px;background:#fff;border-radius:26px;padding:20px;box-shadow:0 30px 60px -30px rgba(21,21,21,.35);font-size:15px}
+.w{position:relative;width:100%;max-width:400px;background:#fff;border-radius:26px;padding:20px;box-shadow:0 40px 80px -30px rgba(0,0,0,.75);font-size:15px}
 .w .d{font-size:22px;letter-spacing:-.02em}
 .w small{color:var(--muted);font-size:13px}
 .w .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -210,7 +211,7 @@ section{padding:80px 0}
 .w .prog{height:6px;border-radius:3px;background:var(--surface);margin-top:12px;overflow:hidden}
 .w .prog i{display:block;height:100%;width:30%;background:var(--text);border-radius:3px;transition:width .6s var(--ease)}
 /* PDF + Mail */
-.pdf{position:relative;width:100%;max-width:330px;background:#fff;border-radius:16px;padding:22px 22px 26px;box-shadow:0 30px 60px -30px rgba(21,21,21,.35)}
+.pdf{position:relative;width:100%;max-width:330px;background:#fff;border-radius:16px;padding:22px 22px 26px;box-shadow:0 40px 80px -30px rgba(0,0,0,.75)}
 .pdf .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .pdf .hd .d{font-size:18px}
 .pdf .hd span{font-size:11px;font-weight:800;color:var(--blush-ink);background:var(--blush);padding:3px 8px;border-radius:6px}
@@ -256,21 +257,18 @@ section{padding:80px 0}
 
 /* Kacheln mit Figuren aus der App */
 .tiles{display:grid;gap:10px;margin-top:40px}
-.tile{position:relative;overflow:hidden;border-radius:26px;padding:24px 22px 22px;min-height:200px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .35s var(--ease)}
+.tile{position:relative;overflow:hidden;border-radius:26px;padding:24px 22px 22px;min-height:200px;color:var(--text);box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);background:radial-gradient(90% 80% at 100% 0,color-mix(in srgb,var(--tint) 18%,transparent),transparent 70%),var(--surface);display:flex;flex-direction:column;justify-content:flex-end;transition:transform .35s var(--ease)}
 .tile:hover{transform:translateY(-4px)}
 .tile img{position:absolute;right:14px;top:14px;width:96px;height:96px;object-fit:contain;transition:transform .5s var(--ease)}
 .tile:hover img{transform:rotate(-6deg) scale(1.08)}
 .tile h3{max-width:70%}
-.tile p{font-size:15px;line-height:1.45;margin-top:6px;max-width:30em}
-.tile.peach{background:var(--peach);color:var(--peach-ink)}
-.tile.mint{background:var(--mint);color:var(--mint-ink)}
-.tile.lavender{background:var(--lavender);color:var(--lavender-ink)}
-.tile.butter{background:var(--butter);color:var(--butter-ink)}
-.tile.sky{background:var(--sky);color:var(--sky-ink)}
+.tile p{font-size:15px;line-height:1.45;margin-top:6px;max-width:30em;color:var(--muted)}
+.tile.peach{--tint:var(--peach)}.tile.mint{--tint:var(--mint)}.tile.lavender{--tint:var(--lavender)}
+.tile.butter{--tint:var(--butter)}.tile.sky{--tint:var(--sky)}
 
 /* Pakete */
 .plans{display:grid;gap:12px;margin-top:36px}
-.plan{background:#fff;border-radius:26px;padding:26px 22px;display:flex;flex-direction:column;box-shadow:inset 0 0 0 1.5px var(--line);transition:transform .35s var(--ease),box-shadow .35s ease}
+.plan{background:var(--bg);border-radius:26px;padding:26px 22px;display:flex;flex-direction:column;box-shadow:inset 0 0 0 1.5px var(--line);transition:transform .35s var(--ease),box-shadow .35s ease}
 .plan:hover{transform:translateY(-4px)}
 .plan.hl{box-shadow:inset 0 0 0 2px var(--text)}
 .plan .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -284,10 +282,14 @@ section{padding:80px 0}
 .note{color:var(--muted);font-size:14px;margin-top:20px}
 
 /* Abschluss */
-.end{text-align:center}
+.end{position:relative;overflow:hidden;text-align:center;padding-top:0}
+.end-img{position:relative;margin-bottom:-24px}
+.end-img img{width:100%;aspect-ratio:16/11;object-fit:cover;object-position:74% 60%;opacity:.85}
+.end-img:after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,var(--bg))}
+.end .wrap{position:relative}
 .end .lead{margin-left:auto;margin-right:auto}
 .end .ctas{justify-content:center}
-.end .icon{width:96px;height:96px;border-radius:24px;margin:0 auto 26px;box-shadow:0 20px 40px -18px rgba(21,21,21,.35);animation:float 5s ease-in-out infinite}
+.end .icon{width:96px;height:96px;border-radius:24px;margin:0 auto 26px;box-shadow:0 20px 40px -18px rgba(0,0,0,.8);animation:float 5s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-6px)}}
 
 footer{border-top:1px solid var(--line);padding:28px 0 calc(104px + env(safe-area-inset-bottom));font-size:14px;color:var(--muted)}
@@ -297,7 +299,7 @@ footer a{text-decoration:none}
 footer a:hover{color:var(--text)}
 
 /* Leiste unten auf dem Handy, solange kein anderer Knopf zu sehen ist. */
-.getbar{position:fixed;z-index:25;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:22px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 12px 40px -12px rgba(21,21,21,.35),inset 0 0 0 1px var(--line);transform:translateY(140%);transition:transform .35s var(--ease)}
+.getbar{position:fixed;z-index:25;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:22px;background:rgba(22,20,18,.9);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 12px 40px -12px rgba(0,0,0,.7),inset 0 0 0 1px var(--line);transform:translateY(140%);transition:transform .35s var(--ease)}
 .getbar.on{transform:none}
 .getbar img{width:40px;height:40px;border-radius:10px}
 .getbar div{flex:1;min-width:0;font-size:13px;line-height:1.25;color:var(--muted)}
@@ -324,11 +326,20 @@ footer a:hover{color:var(--text)}
   .stagebox{min-height:520px}
   .tiles{grid-template-columns:repeat(3,1fr)}
   .tile.wide{grid-column:span 2}
+  .end{text-align:left;padding:150px 0}
+  .end-img{position:absolute;top:0;bottom:0;right:0;left:30%;margin:0}
+  .end-img img{height:100%;aspect-ratio:auto;object-position:right 60%}
+  .end-img:after{background:linear-gradient(to right,var(--bg),transparent 32%),linear-gradient(to bottom,var(--bg),transparent 16%,transparent 84%,var(--bg))}
+  .end .wrap>*{max-width:500px}
+  .end .icon{margin-left:0}
+  .end .lead{margin-left:0}
+  .end .ctas{justify-content:flex-start}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*:before,*:after{animation:none!important;transition:none!important}
   .rv{opacity:1;transform:none}
+  .hero-bg img,.stagebox .bg{transform:none}
 }
 </style>
 </head>
@@ -350,6 +361,7 @@ footer a:hover{color:var(--text)}
 <main id="top">
 
 <section class="hero">
+  <div class="hero-bg" aria-hidden="true"><img src="img/food/tisch-1200.webp" srcset="img/food/tisch-1200.webp 1200w, img/food/tisch-2400.webp 2400w" sizes="100vw" alt="" width="2400" height="1029" fetchpriority="low"></div>
   <div class="wrap hero-grid">
     <div class="rv">
       <span class="pill mint"><span class="dot"></span>Pilotphase in Nürnberg</span>
@@ -365,7 +377,6 @@ footer a:hover{color:var(--text)}
       <p class="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M10 21h4"/></svg>Am besten auf dem iPad. Läuft auch auf dem iPhone.</p>
     </div>
     <div class="hero-visual rv d2">
-      <div class="glow"></div>
       <div class="ipad" role="img" aria-label="Tablevo auf dem iPad: Tischplan, in dem eine Reservierung mit einem Tipp an Tisch 1 gesetzt wird und Hinweise verschwinden, sobald sie erledigt sind">
         <div class="screen"><div class="ui" id="floor" aria-hidden="true">
           <div class="rail">
@@ -439,7 +450,7 @@ footer a:hover{color:var(--text)}
         <ul class="checks"><li>Link für eure Webseite, Google und Instagram</li><li>Bestätigung per Mail an den Gast, ganz automatisch</li><li>Bitte um Bewertung kurz nach dem Besuch</li></ul>
       </div>
       <div class="stagebox peach photo rv d1" data-demo="book">
-        <img class="bg" src="img/food/tisch.webp" alt="" loading="lazy" style="object-position:50% 60%">
+        <img class="bg" src="img/food/salmonroll.webp" alt="" loading="lazy" style="object-position:50% 60%">
         <div class="w" aria-hidden="true">
           <div class="d">Tisch reservieren</div><small>Dein Restaurant · Nürnberg</small>
           <p class="lab">Personen</p>
@@ -462,7 +473,7 @@ footer a:hover{color:var(--text)}
         <ul class="checks"><li>Timer an jedem Tisch, Farbe und Text zusammen</li><li>Hinweis, wenn Gäste sitzen und noch niemand da war</li><li>Hinweis, wenn ein Tisch frei, aber nicht abgeräumt ist</li></ul>
       </div>
       <div class="stagebox mint photo rv d1" data-demo="tiles">
-        <img class="bg" src="img/food/pass.webp" alt="" loading="lazy" style="object-position:40% 70%">
+        <img class="bg" src="img/food/ceviche.webp" alt="" loading="lazy" style="object-position:50% 55%">
         <div class="w" aria-hidden="true">
           <div class="row"><span class="d">Tische</span><small id="tl-c">4 von 6 belegt</small></div>
           <div class="tiles3" id="tl">
@@ -614,6 +625,7 @@ footer a:hover{color:var(--text)}
 </section>
 
 <section class="end" id="kontakt">
+  <div class="end-img" aria-hidden="true"><img src="img/food/pass-1200.webp" srcset="img/food/pass-1200.webp 1200w, img/food/pass-2400.webp 2400w" sizes="(min-width:960px) 70vw, 100vw" alt="" loading="lazy" width="2400" height="1357"></div>
   <div class="wrap">
     <img class="icon rv" src="img/apple-touch-icon.png" alt="" width="96" height="96">
     <p class="kicker rv">Bald im App Store · für iPad und iPhone</p>
