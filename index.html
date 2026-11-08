@@ -5,35 +5,37 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#FFFFFF">
 <title>Tablevo – Reservierung, Tischplan und Lager für Restaurants</title>
-<meta name="description" content="Eigener Buchungslink statt Reservierungsportal, Tische live im Blick und das Lager ohne Zettel. Bald im App Store.">
+<meta name="description" content="Eigener Buchungslink statt Reservierungsportal, Tische live im Blick und das Lager ohne Zettel. Für iPad und iPhone, bald im App Store.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tablevo.torchtechnology.de/">
 <meta property="og:title" content="Tablevo – Weniger tippen. Mehr Gäste.">
-<meta property="og:description" content="Reservierungen, Tischplan und Lager in einer App. Bald im App Store.">
+<meta property="og:description" content="Reservierungen, Tischplan und Lager in einer App. Für iPad und iPhone, bald im App Store.">
 <meta property="og:image" content="https://tablevo.torchtechnology.de/img/apple-touch-icon.png">
 <link rel="icon" href="img/favicon.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="preload" href="fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="img/app/tische.webp" as="image">
 <style>
 /* Mobile first: die Regeln unten sind das Handy, größere Layouts kommen über min-width dazu (600, 960).
-   Farben und Schrift wie in der App (lib/core/theme.dart, docs/design.md). App-Screens: echte Aufnahmen aus
-   integration_test/tour_test.dart mit Beispieldaten, 640 px breit in img/app/. Figuren: assets/icons der App. */
+   Farben und Schrift wie in der App (lib/core/theme.dart, docs/design.md).
+   Die App-Ansichten sind nachgezeichnet (HTML/CSS) und animiert, keine Screenshots: Sie bleiben scharf und
+   hängen nicht am Zwischenstand der App. Inhalte sind Beispiele. Figuren (img/ill) kommen aus assets/icons
+   und liegen nie über einer App-Ansicht. */
 @font-face{font-family:"Jakarta";font-weight:200 800;font-display:swap;src:url(fonts/PlusJakartaSans.woff2) format("woff2")}
 :root{
   --bg:#FFFFFF;--surface:#F6F5F2;--surface2:#EDEBE6;--line:#E6E3DD;--text:#151515;--muted:#6B675F;
   --mint:#D3F4E1;--mint-ink:#0D5A35;--butter:#FFEFB8;--butter-ink:#654A00;--peach:#FFDCCC;--peach-ink:#7C3216;
   --blush:#FFD5D5;--blush-ink:#8A1B1B;--lavender:#E5DFFF;--lavender-ink:#3A2B8C;--sky:#D8EBFF;--sky-ink:#134776;
   --rose:#FCDCEA;--rose-ink:#7A1F4D;
-  --page:1160px;--gutter:max(20px,env(safe-area-inset-left));--bar:60px
+  --page:1160px;--gutter:max(20px,env(safe-area-inset-left));--bar:60px;
+  --ease:cubic-bezier(.2,.8,.2,1)
 }
 *{box-sizing:border-box}
 html{background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-wrap:break-word}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-wrap:break-word;overflow-x:hidden}
 img{display:block;max-width:100%;height:auto}
 a{color:inherit}
-h1,h2,h3,.num,.word{font-family:"Jakarta",-apple-system,BlinkMacSystemFont,sans-serif;font-weight:800;margin:0}
-h1{font-size:clamp(42px,12vw,84px);line-height:1;letter-spacing:-.035em}
+h1,h2,h3,.num,.word,.d{font-family:"Jakarta",-apple-system,BlinkMacSystemFont,sans-serif;font-weight:800;margin:0}
+h1{font-size:clamp(44px,12.5vw,88px);line-height:.98;letter-spacing:-.04em}
 h2{font-size:clamp(32px,8.4vw,56px);line-height:1.04;letter-spacing:-.03em}
 h3{font-size:20px;line-height:1.2;letter-spacing:-.01em}
 p{margin:0}
@@ -43,15 +45,21 @@ p{margin:0}
 section{padding:80px 0}
 [id]{scroll-margin-top:calc(var(--bar) + 12px)}
 
-/* Knöpfe: ein schwarzer Hauptknopf je Bereich, groß und rund wie in der App. */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 24px;border-radius:16px;background:var(--text);color:#fff;font-weight:700;font-size:16px;text-decoration:none;white-space:nowrap;transition:transform .15s ease,background .15s ease}
-.btn:hover{background:#000;transform:translateY(-1px)}
+/* Erscheinen beim Scrollen */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
 
+/* Knöpfe */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 24px;border-radius:16px;background:var(--text);color:#fff;font-weight:700;font-size:16px;text-decoration:none;white-space:nowrap;transition:transform .2s var(--ease),background .2s ease}
+.btn:hover{background:#000;transform:translateY(-2px)}
 /* „Bald im App Store“: eigenes Etikett, nicht Apples Abzeichen (das gibt es erst, wenn die App im Store ist). */
 .soon{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 16px 0 12px;border-radius:14px;background:var(--surface);color:var(--text)}
 .soon svg{width:26px;height:26px;flex:none}
 .soon small{display:block;font-size:11px;line-height:1.1;color:var(--muted);font-weight:600}
 .soon b{display:block;font:800 17px/1.15 "Jakarta",sans-serif;letter-spacing:-.01em}
+.soon .hand{transform-origin:13px 13px;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* Oberer Balken */
 .nav{position:fixed;top:0;left:0;right:0;z-index:30;padding-top:env(safe-area-inset-top);background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 1px 0 transparent;transition:box-shadow .2s ease}
@@ -67,59 +75,181 @@ section{padding:80px 0}
 .nav .btn{margin-left:auto;min-height:40px;padding:0 16px;border-radius:12px;font-size:15px}
 
 /* Hero */
-.hero{padding:calc(var(--bar) + 28px + env(safe-area-inset-top)) 0 40px;overflow:hidden}
-.hero-grid{display:grid;gap:44px;align-items:center}
+.hero{padding:calc(var(--bar) + 28px + env(safe-area-inset-top)) 0 24px;overflow:hidden}
+.hero-grid{display:grid;gap:40px;align-items:center}
 .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700}
 .pill.mint{background:var(--mint);color:var(--mint-ink)}
 .pill .dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.35}}
+@keyframes pulse{50%{opacity:.3}}
 .hero .pill{margin-bottom:22px}
 .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:30px}
-.hero-visual{position:relative;display:flex;justify-content:center;padding:10px 0 20px}
-.blob{position:absolute;inset:6% 2% 0;border-radius:44px;background:var(--mint)}
-.float{position:absolute;z-index:3;filter:drop-shadow(0 14px 22px rgba(21,21,21,.12));animation:bob 6s ease-in-out infinite}
-.float.a{width:30%;max-width:150px;left:-2%;top:12%}
-.float.b{width:24%;max-width:120px;right:-1%;bottom:12%;animation-delay:-3s}
-@keyframes bob{50%{transform:translateY(-8px)}}
-.chip-card{position:absolute;z-index:3;right:0;top:16%;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 18px 40px -16px rgba(21,21,21,.3);font-size:13px;line-height:1.3;max-width:190px}
-.chip-card b{display:block;font:800 15px/1.2 "Jakarta",sans-serif}
-.chip-card span{color:var(--muted)}
-.chip-card i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#E0A800;margin-right:6px;vertical-align:1px}
+.devices{font-size:14px;color:var(--muted);margin-top:18px;display:flex;align-items:center;gap:8px}
+.devices svg{width:18px;height:18px;flex:none}
+/* weicher, langsam wandernder Farbhintergrund hinter dem iPad */
+.glow{position:absolute;inset:-6% -4%;z-index:0;border-radius:48px;background:
+  radial-gradient(40% 50% at 20% 30%,var(--mint) 0,transparent 70%),
+  radial-gradient(40% 50% at 80% 25%,var(--peach) 0,transparent 70%),
+  radial-gradient(45% 55% at 60% 85%,var(--lavender) 0,transparent 70%);
+  filter:blur(8px);animation:drift 16s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(2%,-2%) scale(1.04)}}
 
-/* Telefonrahmen aus CSS, Inhalt sind echte App-Aufnahmen. */
-.phone{position:relative;z-index:2;width:min(300px,74vw);aspect-ratio:640/1391;border-radius:46px;padding:10px;background:#151515;box-shadow:0 40px 80px -30px rgba(21,21,21,.45),inset 0 0 0 2px #2b2b2b}
-.phone:before{content:"";position:absolute;z-index:2;top:20px;left:50%;width:30%;height:24px;margin-left:-15%;border-radius:20px;background:#151515}
-.phone .screen{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;background:#fff}
-.phone .screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;transition:opacity .45s ease}
-.phone .screen img:not(.on){opacity:0}
+/* iPad-Rahmen: Bildschirm 1180 × 820, wird per --s auf die Breite skaliert. */
+.ipad{position:relative;z-index:1;width:100%;padding:clamp(8px,1.4vw,16px);border-radius:clamp(22px,3vw,40px);background:#151515;box-shadow:0 50px 100px -40px rgba(21,21,21,.5),inset 0 0 0 2px #2c2c2c}
+.ipad .screen{position:relative;aspect-ratio:1180/820;border-radius:clamp(14px,1.8vw,26px);overflow:hidden;background:#fff}
+.ipad .ui{position:absolute;left:0;top:0;width:1180px;height:820px;transform-origin:0 0;transform:scale(var(--s,.3))}
+.hero-visual{position:relative}
+
+/* ---------- Nachgebaute App: Tischplan (Hero) ---------- */
+.ui{font:15px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);display:flex;background:#fff}
+.ui .rail{width:92px;flex:none;background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:28px}
+.ui .ri{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.ui .ri i{width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.ui .ri svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ui .ri.on{color:var(--text)}.ui .ri.on i{background:var(--mint);color:var(--mint-ink)}
+.ui .main{flex:1;padding:26px 30px 24px;display:flex;flex-direction:column;min-width:0}
+.ui .top{display:flex;align-items:flex-start;justify-content:space-between}
+.ui .top .d{font-size:36px;letter-spacing:-.02em;line-height:1.05}
+.ui .top p{color:var(--muted);font-size:15px;margin-top:6px}
+.ui .acts{display:flex;gap:10px}
+.ui .acts span{width:46px;height:46px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:flex;align-items:center;justify-content:center}
+.ui .acts span.k{background:var(--text);box-shadow:none;color:#fff;font-size:28px;font-weight:300}
+.ui .cols{display:flex;gap:22px;margin-top:22px;flex:1;min-height:0}
+.ui .side{width:290px;flex:none;display:flex;flex-direction:column;gap:12px}
+.ui .alarm{background:var(--butter);color:var(--butter-ink);border-radius:18px;padding:13px 16px;font-weight:700;font-size:15px;box-shadow:inset 0 0 0 2px var(--butter-ink);display:flex;align-items:center;justify-content:space-between;gap:10px;overflow:hidden;max-height:90px;transition:max-height .5s var(--ease),opacity .4s ease,padding .5s var(--ease),margin .5s var(--ease)}
+.ui .alarm button{all:unset;background:#fff;border-radius:12px;padding:7px 11px;font-size:13px;font-weight:700;white-space:nowrap;position:relative}
+.ui .gone{max-height:0!important;opacity:0;padding-top:0!important;padding-bottom:0!important;margin-top:-12px}
+.ui .card{background:var(--surface);border-radius:20px;padding:16px 18px}
+.ui .card .d{font-size:18px}
+.ui .card small{color:var(--muted);font-size:13px}
+.ui .nx{display:flex;justify-content:space-between;font-size:15px;margin-top:9px}
+.ui .nx b{font-weight:700}
+.ui .res{background:var(--surface);border-radius:20px;padding:16px 18px;overflow:hidden;max-height:200px;transition:max-height .55s var(--ease),opacity .4s ease,padding .55s var(--ease),transform .55s var(--ease)}
+.ui .res .d{font-size:19px}
+.ui .res small{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+.ui .res small em{font-style:normal;color:var(--butter-ink);font-weight:700}
+.ui .res button{all:unset;display:block;box-sizing:border-box;width:100%;text-align:center;margin-top:12px;padding:12px;border-radius:14px;background:var(--text);color:#fff;font-weight:700;position:relative}
+.ui .res.out{transform:translateX(-110%);opacity:0;max-height:0;padding-top:0;padding-bottom:0;margin-top:-12px}
+.ui .floor{position:relative;flex:1;background:var(--surface);border-radius:24px}
+.ui .lbl{position:absolute;font-size:12px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:4px 10px}
+.ui .t{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;font-weight:700;font-size:13px;transition:background .5s ease,color .5s ease,box-shadow .5s ease,transform .3s var(--ease)}
+.ui .t .n{font:800 30px/1 "Jakarta",sans-serif}
+.ui .t.round{border-radius:50%}
+.ui .t.free{background:var(--mint);color:var(--mint-ink)}
+.ui .t.occ{background:var(--blush);color:var(--blush-ink)}
+.ui .t.alarm{background:var(--butter);color:var(--butter-ink);box-shadow:inset 0 0 0 2.5px var(--butter-ink);animation:breathe 1.6s ease-in-out infinite}
+.ui .t.clean{background:var(--lavender);color:var(--lavender-ink)}
+.ui .t.pop{transform:scale(1.08)}
+@keyframes breathe{50%{transform:scale(1.04)}}
+.ui .legend{display:flex;gap:8px;margin-top:14px;font-size:13px;font-weight:700}
+.ui .legend span{padding:5px 11px;border-radius:999px}
+.ui .toast{position:absolute;left:50%;bottom:26px;transform:translate(-50%,140%);background:var(--text);color:#fff;border-radius:16px;padding:13px 18px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;transition:transform .5s var(--ease);white-space:nowrap}
+.ui .toast.on{transform:translate(-50%,0)}
+.ui .toast i{width:22px;height:22px;border-radius:50%;background:var(--mint);display:flex;align-items:center;justify-content:center}
+/* Tipp-Kreis: zeigt, wo „getippt“ wird */
+.tap:after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(21,21,21,.22);animation:tap .7s var(--ease) forwards;pointer-events:none}
+@keyframes tap{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.6);opacity:0}}
 
 /* Drei Zahlen */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:24px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:56px;text-align:center}
 .num{font-size:clamp(28px,8vw,56px);line-height:1;letter-spacing:-.03em}
 .stats p{font-size:13px;line-height:1.35;color:var(--muted);margin-top:8px}
 
-/* Funktionen: auf dem Handy je Kapitel ein Telefon, ab 960 px bleibt das Telefon stehen und nur der Screen wechselt. */
-.chapters{display:grid;gap:72px;margin-top:48px}
-.ch{display:grid;gap:28px;justify-items:center}
-.ch .txt{width:100%}
-.ch .tag{display:inline-block;margin-bottom:14px}
-.ch h3{font-size:clamp(28px,7vw,40px);line-height:1.08;letter-spacing:-.025em}
-.ch ul,.checks{margin:20px 0 0;padding:0;list-style:none;display:grid;gap:10px}
-.ch li,.checks li{display:flex;gap:12px;font-size:16px;line-height:1.45}
-.ch li:before,.checks li:before{content:"";flex:none;width:22px;height:22px;margin-top:1px;border-radius:50%;background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 12.5l3.2 3L17 9' fill='none' stroke='%230D5A35' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
-.ch .phone{width:min(280px,70vw)}
-.stage-phone{display:none}
+/* ---------- Kapitel mit kleinen, animierten App-Ausschnitten ---------- */
+.feat{display:grid;gap:32px;align-items:center;padding:48px 0}
+.feat .tag{display:inline-block;margin-bottom:14px}
+.feat h3{font-size:clamp(28px,7vw,42px);line-height:1.07;letter-spacing:-.025em}
+.checks{margin:20px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.checks li{display:flex;gap:12px;font-size:16px;line-height:1.45}
+.checks li:before{content:"";flex:none;width:22px;height:22px;margin-top:1px;border-radius:50%;background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 12.5l3.2 3L17 9' fill='none' stroke='%230D5A35' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat}
 .tag{padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
 .tag.mint{background:var(--mint);color:var(--mint-ink)}
 .tag.peach{background:var(--peach);color:var(--peach-ink)}
 .tag.butter{background:var(--butter);color:var(--butter-ink)}
 .tag.lavender{background:var(--lavender);color:var(--lavender-ink)}
 .tag.sky{background:var(--sky);color:var(--sky-ink)}
+.tag.rose{background:var(--rose);color:var(--rose-ink)}
+.stagebox{position:relative;border-radius:32px;padding:clamp(18px,4vw,40px);display:flex;justify-content:center;align-items:center;min-height:400px;overflow:hidden}
+.stagebox.peach{background:var(--peach)}.stagebox.mint{background:var(--mint)}.stagebox.lavender{background:var(--lavender)}
+.stagebox.butter{background:var(--butter)}.stagebox.sky{background:var(--sky)}.stagebox.rose{background:var(--rose)}
+.w{position:relative;width:100%;max-width:400px;background:#fff;border-radius:26px;padding:20px;box-shadow:0 30px 60px -30px rgba(21,21,21,.35);font-size:15px}
+.w .d{font-size:22px;letter-spacing:-.02em}
+.w small{color:var(--muted);font-size:13px}
+.w .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.w .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.w .chip{padding:8px 13px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);font-size:14px;font-weight:600;transition:background .35s ease,color .35s ease,box-shadow .35s ease;position:relative}
+.w .chip.on{background:var(--text);color:#fff;box-shadow:none}
+.w .lab{font-size:13px;font-weight:700;color:var(--muted);margin:16px 0 0}
+.w .step{display:flex;align-items:center;gap:14px}
+.w .step span{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;position:relative}
+.w .step b{font:800 22px/1 "Jakarta",sans-serif;min-width:20px;text-align:center}
+.w .cta{display:block;text-align:center;margin-top:18px;padding:14px;border-radius:16px;background:var(--text);color:#fff;font-weight:700;position:relative}
+.w .done{position:absolute;inset:0;border-radius:26px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:24px;opacity:0;pointer-events:none;transition:opacity .45s ease}
+.w .done.on{opacity:1}
+.w .done .ok{width:64px;height:64px;border-radius:50%;background:var(--mint);display:flex;align-items:center;justify-content:center;transform:scale(.4);transition:transform .5s var(--ease)}
+.w .done.on .ok{transform:none}
+.w .done svg{width:30px;height:30px}
+.w .done .d{font-size:24px}
+.w .item{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.w .item:first-of-type{border-top:0}
+.w .item div{flex:1;min-width:0}
+.w .item b{display:block;font-size:15px}
+.w .q{font:800 17px/1 "Jakarta",sans-serif;min-width:62px;text-align:right}
+.w .badge{padding:4px 9px;border-radius:999px;font-size:11px;font-weight:800;transform:scale(0);transition:transform .45s var(--ease)}
+.w .badge.on{transform:none}
+.w .big{font:800 54px/1 "Jakarta",sans-serif;text-align:center;margin:18px 0 6px;letter-spacing:-.02em}
+.w .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.w .keys span{height:44px;border-radius:12px;background:var(--surface);display:flex;align-items:center;justify-content:center;font:700 19px/1 "Jakarta",sans-serif;position:relative;transition:background .2s ease}
+.w .keys span.hit{background:var(--surface2)}
+.w .prog{height:6px;border-radius:3px;background:var(--surface);margin-top:12px;overflow:hidden}
+.w .prog i{display:block;height:100%;width:30%;background:var(--text);border-radius:3px;transition:width .6s var(--ease)}
+/* PDF + Mail */
+.pdf{position:relative;width:100%;max-width:330px;background:#fff;border-radius:16px;padding:22px 22px 26px;box-shadow:0 30px 60px -30px rgba(21,21,21,.35)}
+.pdf .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.pdf .hd .d{font-size:18px}
+.pdf .hd span{font-size:11px;font-weight:800;color:var(--blush-ink);background:var(--blush);padding:3px 8px;border-radius:6px}
+.pdf .sup{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.pdf .ln{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line);opacity:0;transform:translateX(-12px);transition:opacity .35s ease,transform .35s var(--ease)}
+.pdf .ln.on{opacity:1;transform:none}
+.mail{position:absolute;right:clamp(8px,4vw,40px);bottom:clamp(14px,4vw,40px);background:var(--text);color:#fff;border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:14px;transform:translateY(30px) scale(.9);opacity:0;transition:transform .5s var(--ease),opacity .4s ease}
+.mail.on{transform:none;opacity:1}
+.mail b{display:block;font-size:15px}
+.mail i{width:34px;height:34px;border-radius:10px;background:var(--butter);display:flex;align-items:center;justify-content:center;flex:none}
+.mail small{opacity:.7}
+/* Heatmap */
+.heat{display:grid;grid-template-columns:28px repeat(12,1fr);gap:4px;margin-top:14px;font-size:11px;color:var(--muted)}
+.heat i{aspect-ratio:1;border-radius:5px;background:var(--sky);opacity:0;transform:scale(.4);transition:opacity .4s ease,transform .4s var(--ease)}
+.heat i.on{opacity:1;transform:none}
+.heat b{font-weight:700;display:flex;align-items:center}
+.peak{margin-top:14px;display:flex;align-items:center;gap:10px;font-size:14px;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s var(--ease)}
+.peak.on{opacity:1;transform:none}
+.peak span{background:var(--text);color:#fff;padding:5px 10px;border-radius:999px;font-weight:700;font-size:13px}
+/* Tische-Kacheln (Handy-Ausschnitt) */
+.tiles3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.tiles3 div{border-radius:16px;padding:10px 10px 9px;min-height:84px;display:flex;flex-direction:column;justify-content:space-between;font-size:12px;font-weight:700;transition:background .5s ease,color .5s ease,box-shadow .5s ease;position:relative}
+.tiles3 .n{font:800 24px/1 "Jakarta",sans-serif}
+.tiles3 .free{background:var(--mint);color:var(--mint-ink)}
+.tiles3 .occ{background:var(--blush);color:var(--blush-ink)}
+.tiles3 .alarm{background:var(--butter);color:var(--butter-ink);box-shadow:inset 0 0 0 2px var(--butter-ink);animation:breathe 1.6s ease-in-out infinite}
+.tiles3 .clean{background:var(--lavender);color:var(--lavender-ink)}
+/* Gäste: Geschmacksnetz */
+.radar{width:100%;max-width:260px;margin:6px auto 0;display:block}
+.radar .web{fill:none;stroke:var(--line);stroke-width:1}
+.radar .shape{fill:rgba(122,31,77,.18);stroke:var(--rose-ink);stroke-width:2.5;stroke-linejoin:round;transform-origin:130px 120px;transform:scale(.1);opacity:0;transition:transform 1.2s var(--ease),opacity .6s ease}
+.radar.on .shape{transform:none;opacity:1}
+.radar text{font-size:11px;fill:var(--muted);font-weight:600}
+.recs{display:grid;gap:8px;margin-top:14px}
+.rec{border-radius:16px;padding:12px 14px;opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s var(--ease)}
+.rec.on{opacity:1;transform:none}
+.rec b{display:block;font:800 16px/1.2 "Jakarta",sans-serif}
+.rec small{font-size:12px;opacity:.85}
+.rec .m{float:right;font-size:11px;font-weight:800;background:rgba(255,255,255,.7);padding:3px 8px;border-radius:999px}
 
 /* Kacheln mit Figuren aus der App */
 .tiles{display:grid;gap:10px;margin-top:40px}
-.tile{position:relative;overflow:hidden;border-radius:26px;padding:24px 22px 22px;min-height:190px;display:flex;flex-direction:column;justify-content:flex-end}
-.tile img{position:absolute;right:12px;top:12px;width:92px;height:92px;object-fit:contain}
+.tile{position:relative;overflow:hidden;border-radius:26px;padding:24px 22px 22px;min-height:200px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .35s var(--ease)}
+.tile:hover{transform:translateY(-4px)}
+.tile img{position:absolute;right:14px;top:14px;width:96px;height:96px;object-fit:contain;transition:transform .5s var(--ease)}
+.tile:hover img{transform:rotate(-6deg) scale(1.08)}
 .tile h3{max-width:70%}
 .tile p{font-size:15px;line-height:1.45;margin-top:6px;max-width:30em}
 .tile.peach{background:var(--peach);color:var(--peach-ink)}
@@ -130,7 +260,8 @@ section{padding:80px 0}
 
 /* Pakete */
 .plans{display:grid;gap:12px;margin-top:36px}
-.plan{background:#fff;border-radius:26px;padding:26px 22px;display:flex;flex-direction:column;box-shadow:inset 0 0 0 1.5px var(--line)}
+.plan{background:#fff;border-radius:26px;padding:26px 22px;display:flex;flex-direction:column;box-shadow:inset 0 0 0 1.5px var(--line);transition:transform .35s var(--ease),box-shadow .35s ease}
+.plan:hover{transform:translateY(-4px)}
 .plan.hl{box-shadow:inset 0 0 0 2px var(--text)}
 .plan .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .plan .head img{width:56px;height:56px;object-fit:contain}
@@ -142,21 +273,12 @@ section{padding:80px 0}
 .plan .plus{color:var(--muted);font-size:14px;margin-top:auto;padding-top:18px}
 .note{color:var(--muted);font-size:14px;margin-top:20px}
 
-/* Gäste */
-.guest{background:var(--rose);color:var(--rose-ink);border-radius:36px;padding:44px 22px 0;display:grid;gap:32px;overflow:hidden}
-.guest h2{color:var(--text)}
-.guest .lead{color:var(--rose-ink)}
-.guest .checks{color:var(--text)}
-.guest-visual{position:relative;display:flex;justify-content:center;align-items:flex-start;height:420px}
-.guest .phone{width:min(280px,70vw)}
-.guest .float.a{width:26%;max-width:120px;left:0;top:8%}
-.guest .float.b{width:24%;max-width:110px;right:0;bottom:auto;top:44%}
-
 /* Abschluss */
 .end{text-align:center}
 .end .lead{margin-left:auto;margin-right:auto}
 .end .ctas{justify-content:center}
-.end .icon{width:96px;height:96px;border-radius:24px;margin:0 auto 26px;box-shadow:0 20px 40px -18px rgba(21,21,21,.35)}
+.end .icon{width:96px;height:96px;border-radius:24px;margin:0 auto 26px;box-shadow:0 20px 40px -18px rgba(21,21,21,.35);animation:float 5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}}
 
 footer{border-top:1px solid var(--line);padding:28px 0 calc(104px + env(safe-area-inset-bottom));font-size:14px;color:var(--muted)}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
@@ -165,7 +287,7 @@ footer a{text-decoration:none}
 footer a:hover{color:var(--text)}
 
 /* Leiste unten auf dem Handy, solange kein anderer Knopf zu sehen ist. */
-.getbar{position:fixed;z-index:25;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:22px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 12px 40px -12px rgba(21,21,21,.35),inset 0 0 0 1px var(--line);transform:translateY(140%);transition:transform .3s ease}
+.getbar{position:fixed;z-index:25;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:22px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 12px 40px -12px rgba(21,21,21,.35),inset 0 0 0 1px var(--line);transform:translateY(140%);transition:transform .35s var(--ease)}
 .getbar.on{transform:none}
 .getbar img{width:40px;height:40px;border-radius:10px}
 .getbar div{flex:1;min-width:0;font-size:13px;line-height:1.25;color:var(--muted)}
@@ -176,7 +298,6 @@ footer a:hover{color:var(--text)}
   section{padding:104px 0}
   .tiles{grid-template-columns:repeat(2,1fr)}
   .plans{grid-template-columns:repeat(3,1fr)}
-  .guest{padding:56px 48px 0}
   .stats{gap:24px}
 }
 @media (min-width:960px){
@@ -186,29 +307,18 @@ footer a:hover{color:var(--text)}
   .getbar{display:none}
   footer{padding-bottom:28px}
   footer nav{margin-left:auto}
-  .hero{padding-top:calc(var(--bar) + 64px)}
-  .hero-grid{grid-template-columns:1.1fr 1fr;gap:56px}
-  .hero .phone{width:320px}
+  .hero{padding-top:calc(var(--bar) + 56px)}
+  .hero-grid{grid-template-columns:.8fr 1.2fr;gap:48px}
+  .feat{grid-template-columns:1fr 1fr;gap:64px;padding:64px 0}
+  .feat.flip .stagebox{order:-1}
+  .stagebox{min-height:520px}
   .tiles{grid-template-columns:repeat(3,1fr)}
   .tile.wide{grid-column:span 2}
-  .guest{grid-template-columns:1.1fr 1fr;gap:48px;padding:72px 64px 0;align-items:center}
-  .guest .txt{padding-bottom:72px}
-  .guest-visual{height:520px;align-self:end}
-  .guest .phone{width:300px}
-  /* Bühne: links die Kapitel, rechts bleibt das Telefon stehen. */
-  .stage{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:24px}
-  .chapters{gap:0;margin-top:0}
-  .ch{min-height:86vh;align-content:center;justify-items:start;opacity:.28;transition:opacity .4s ease}
-  .ch.on{opacity:1}
-  .ch .phone{display:none}
-  .stage-phone{position:sticky;top:calc(var(--bar) + 30px);height:calc(100vh - var(--bar) - 60px);display:flex;align-items:center;justify-content:center}
-  .stage-phone .blob{inset:6% 8%;transition:background .45s ease}
-  .stage-phone .phone{width:min(330px,calc((100vh - var(--bar) - 110px)*640/1391))}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .float,.pill .dot{animation:none}
-  .btn,.phone .screen img,.ch,.getbar{transition:none}
+  *,*:before,*:after{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}
 }
 </style>
 </head>
@@ -231,108 +341,185 @@ footer a:hover{color:var(--text)}
 
 <section class="hero">
   <div class="wrap hero-grid">
-    <div>
+    <div class="rv">
       <span class="pill mint"><span class="dot"></span>Pilotphase in Nürnberg</span>
       <h1>Weniger tippen.<br>Mehr Gäste.</h1>
       <p class="lead">Reservierungen, Tischplan und Lager in einer App. Gebaut für den Service, nicht fürs Büro.</p>
       <div class="ctas" id="hero-ctas">
         <a class="btn" href="#kontakt">Pilotrestaurant werden</a>
         <span class="soon" aria-label="Bald im App Store">
-          <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="#D3F4E1"/><path d="M13 7v6l4 2.5" fill="none" stroke="#0D5A35" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="#D3F4E1"/><path class="hand" d="M13 13V7.5" stroke="#0D5A35" stroke-width="2.2" stroke-linecap="round"/><path d="M13 13l3.5 2" stroke="#0D5A35" stroke-width="2.2" stroke-linecap="round"/></svg>
           <span><small>Bald im</small><b>App Store</b></span>
         </span>
       </div>
+      <p class="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M10 21h4"/></svg>Am besten auf dem iPad. Läuft auch auf dem iPhone.</p>
     </div>
-    <div class="hero-visual">
-      <div class="blob"></div>
-      <img class="float a" src="img/ill/restaurant.webp" alt="" width="150" height="150">
-      <img class="float b" src="img/ill/sushi.webp" alt="" width="120" height="120">
-      <div class="chip-card" aria-hidden="true"><b><i></i>Tisch 4: Noch da?</b><span>1:52 h · 4 Personen</span></div>
-      <div class="phone"><div class="screen"><img class="on" src="img/app/tische.webp" alt="Tischplan in Tablevo: freie Tische grün, besetzte mit Timer, Tisch 4 mit Hinweis" width="640" height="1391"></div></div>
+    <div class="hero-visual rv d2">
+      <div class="glow"></div>
+      <div class="ipad" role="img" aria-label="Tablevo auf dem iPad: Tischplan, in dem eine Reservierung mit einem Tipp an Tisch 1 gesetzt wird und Hinweise verschwinden, sobald sie erledigt sind">
+        <div class="screen"><div class="ui" id="floor" aria-hidden="true">
+          <div class="rail">
+            <div class="ri on"><i><svg viewBox="0 0 24 24"><path d="M4 9h16M6 9v9M18 9v9M8 13h8"/></svg></i>Tische</div>
+            <div class="ri"><i><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M10 14h4"/></svg></i>Lager</div>
+            <div class="ri"><i><svg viewBox="0 0 24 24"><path d="M4 5h2l2 10h10l2-7H7"/><circle cx="9" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></svg></i>Einkauf</div>
+            <div class="ri"><i><svg viewBox="0 0 24 24"><path d="M4 6c3-1 5-1 8 1 3-2 5-2 8-1v12c-3-1-5-1-8 1-3-2-5-2-8-1z"/><path d="M12 7v12"/></svg></i>Karte</div>
+            <div class="ri"><i><svg viewBox="0 0 24 24"><path d="M6 19V11M12 19V6M18 19v-5"/></svg></i>Zahlen</div>
+          </div>
+          <div class="main">
+            <div class="top">
+              <div><div class="d">Tische</div><p><span id="f-occ">5</span> von 12 belegt · <span id="f-res">6</span> Reservierungen heute offen</p></div>
+              <div class="acts"><span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#151515" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><span class="k">+</span></div>
+            </div>
+            <div class="cols">
+              <div class="side">
+                <div class="alarm" id="a5">Tisch 5: seit 7 Min niemand da<button id="b5">✓ Service war da</button></div>
+                <div class="alarm" id="a4">Tisch 4: Noch da? <span style="font-weight:600">1:52 h</span><button id="b4">Gäste weg</button></div>
+                <div class="res" id="r1"><div class="row" style="display:flex;justify-content:space-between"><span class="d">Yilmaz</span><span style="font-size:13px;color:var(--muted)">···</span></div><small>19:30 · 2 Pers. · Telefon · <em>5 Min zu spät</em></small><button id="br1">An Tisch 1</button></div>
+                <div class="card"><div class="d">Als Nächstes frei</div><small>Geschätzt aus der üblichen Sitzdauer</small>
+                  <div class="nx"><b>Tisch 8</b><span>in etwa 30 Min</span></div>
+                  <div class="nx"><b>Tisch 2</b><span>in etwa 55 Min</span></div>
+                  <div class="nx"><b>Bar 1</b><span>in etwa 1:15 h</span></div>
+                </div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+                <div class="floor">
+                  <span class="lbl" style="left:90px;top:16px">Fenster</span>
+                  <span class="lbl" style="right:60px;top:16px">Bar</span>
+                  <span class="lbl" style="left:250px;bottom:14px">Küche</span>
+                  <span class="lbl" style="left:12px;top:262px">Eingang</span>
+                  <div class="t free" id="t1" style="left:84px;top:60px;width:104px;height:96px"><span class="n">1</span><span class="s">Frei</span></div>
+                  <div class="t occ" id="t2" style="left:204px;top:60px;width:104px;height:96px"><span class="n">2</span><span class="s" data-min="38">38 Min</span></div>
+                  <div class="t free" id="t3" style="left:324px;top:60px;width:104px;height:96px"><span class="n">3</span><span class="s">Frei</span></div>
+                  <div class="t occ" id="tb1" style="right:122px;top:60px;width:92px;height:96px"><span class="n">Bar 1</span><span class="s" data-min="15">15 Min</span></div>
+                  <div class="t free" style="right:22px;top:60px;width:92px;height:96px"><span class="n">Bar 2</span><span class="s">Frei</span></div>
+                  <div class="t alarm" id="t4" style="left:104px;top:222px;width:110px;height:104px"><span class="n">4</span><span class="s">Noch da?</span></div>
+                  <div class="t alarm" id="t5" style="left:230px;top:222px;width:110px;height:104px"><span class="n">5</span><span class="s">Niemand da</span></div>
+                  <div class="t free" style="left:356px;top:222px;width:110px;height:104px"><span class="n">6</span><span class="s">Frei</span></div>
+                  <div class="t free" style="left:482px;top:222px;width:110px;height:104px"><span class="n">7</span><span class="s">Frei</span></div>
+                  <div class="t occ" id="t8" style="left:104px;top:392px;width:176px;height:100px"><span class="n">8</span><span class="s" data-min="64">1:04 h</span></div>
+                  <div class="t free" style="left:298px;top:392px;width:130px;height:100px"><span class="n">9</span><span class="s">Frei</span></div>
+                  <div class="t free round" style="left:470px;top:370px;width:140px;height:140px"><span class="n">10</span><span class="s">Frei</span></div>
+                </div>
+                <div class="legend"><span style="background:var(--mint);color:var(--mint-ink)">Frei</span><span style="background:var(--blush);color:var(--blush-ink)">Besetzt</span><span style="background:var(--butter);color:var(--butter-ink)">Noch da?</span><span style="background:var(--lavender);color:var(--lavender-ink)">Reinigen</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="toast" id="toast"><i><svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 12.5l4 4L18 8" fill="none" stroke="#0D5A35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span id="toast-t">Yilmaz sitzt an Tisch 1</span></div>
+        </div></div>
+      </div>
     </div>
   </div>
   <div class="wrap stats">
-    <div><div class="num">1 Tipp</div><p>und der Tisch ist wieder frei</p></div>
-    <div><div class="num">4</div><p>Bereiche: Bar, Küche, Sushi, Theke</p></div>
-    <div><div class="num">1 Mail</div><p>pro Woche mit allem, was fehlt</p></div>
+    <div class="rv"><div class="num">1 Tipp</div><p>und die Reservierung sitzt</p></div>
+    <div class="rv d1"><div class="num">4</div><p>Bereiche: Bar, Küche, Sushi, Theke</p></div>
+    <div class="rv d2"><div class="num">1 Mail</div><p>pro Woche mit allem, was fehlt</p></div>
   </div>
 </section>
 
-<section id="funktionen" style="padding-top:40px">
+<section id="funktionen" style="padding-top:48px">
   <div class="wrap">
-    <p class="kicker">Funktionen</p>
-    <h2>Alles, was im Service zählt.</h2>
-    <div class="stage">
-      <div class="chapters">
-        <article class="ch" data-shot="tische" data-blob="var(--mint)">
-          <div class="txt">
-            <span class="tag mint">Tische live</span>
-            <h3>Kein Tisch bleibt aus Versehen „besetzt“.</h3>
-            <p class="lead">Jeder im Team sieht auf einen Blick, was los ist, auch ohne festen Platzierer am Eingang.</p>
-            <ul>
-              <li>Timer an jedem Tisch, Farbe und Text auf einen Blick</li>
-              <li>Hinweis, wenn Gäste lange sitzen: „Noch da?“</li>
-              <li>Wartende Reservierung mit einem Tipp an den Tisch</li>
-            </ul>
-          </div>
-          <div class="phone"><div class="screen"><img class="on" src="img/app/tische.webp" alt="Tischplan" loading="lazy" width="640" height="1391"></div></div>
-        </article>
-        <article class="ch" data-shot="reservieren" data-blob="var(--peach)">
-          <div class="txt">
-            <span class="tag peach">Reservierung</span>
-            <h3>Euer eigener Buchungslink.</h3>
-            <p class="lead">Gäste reservieren direkt bei euch, ohne Portal dazwischen. Neue Buchungen landen sofort im Tischplan.</p>
-            <ul>
-              <li>Link für eure Webseite und Instagram</li>
-              <li>Bestätigung per Mail an den Gast, ganz automatisch</li>
-              <li>Bitte um Bewertung kurz nach dem Besuch</li>
-            </ul>
-          </div>
-          <div class="phone"><div class="screen"><img class="on" src="img/app/reservieren.webp" alt="Tisch reservieren: Personen, Tag und Uhrzeit wählen" loading="lazy" width="640" height="1391"></div></div>
-        </article>
-        <article class="ch" data-shot="lager" data-blob="var(--lavender)">
-          <div class="txt">
-            <span class="tag lavender">Lager</span>
-            <h3>Inventur mit Plus und Minus.</h3>
-            <p class="lead">Getrennt nach Bar, warmer Küche, Sushi und Theke. Was knapp wird, seht ihr sofort.</p>
-            <ul>
-              <li>Mengen, Haltbarkeit und Lieferant je Artikel</li>
-              <li>„Läuft bald ab“ und „Nachbestellen“ auf einen Blick</li>
-              <li>Mehrere Lieferanten, eine Einkaufsliste</li>
-            </ul>
-          </div>
-          <div class="phone"><div class="screen"><img class="on" src="img/app/lager.webp" alt="Lager mit Artikeln, Mengen und Hinweisen" loading="lazy" width="640" height="1391"></div></div>
-        </article>
-        <article class="ch" data-shot="mail" data-blob="var(--butter)">
-          <div class="txt">
-            <span class="tag butter">Fehlliste</span>
-            <h3>Jede Woche, was fehlt. Als PDF.</h3>
-            <p class="lead">Tag und Uhrzeit wählt ihr selbst. Ist nichts offen, kommt auch keine Mail.</p>
-            <ul>
-              <li>Einkaufsliste als PDF, je Lieferant</li>
-              <li>Entwurf an den Lieferanten mit einem Tipp</li>
-            </ul>
-          </div>
-          <div class="phone"><div class="screen"><img class="on" src="img/app/mail.webp" alt="Einstellung für die wöchentliche Fehlliste per Mail" loading="lazy" width="640" height="1391"></div></div>
-        </article>
-        <article class="ch" data-shot="zahlen" data-blob="var(--sky)">
-          <div class="txt">
-            <span class="tag sky">Zahlen</span>
-            <h3>Wisst, wann es voll wird.</h3>
-            <p class="lead">Sitzdauer, beliebteste Tische und Stoßzeiten aus eurem echten Betrieb, für die Planung am Wochenende.</p>
-          </div>
-          <div class="phone"><div class="screen"><img class="on" src="img/app/zahlen.webp" alt="Auswertung: Sitzdauer und beliebteste Tische" loading="lazy" width="640" height="1391"></div></div>
-        </article>
+    <p class="kicker rv">Funktionen</p>
+    <h2 class="rv">Alles, was im Service zählt.</h2>
+
+    <div class="feat">
+      <div class="rv">
+        <span class="tag peach">Reservierung</span>
+        <h3>Euer eigener Buchungslink.</h3>
+        <p class="lead">Gäste reservieren direkt bei euch, ohne Portal dazwischen. Die Buchung steht sofort im Tischplan.</p>
+        <ul class="checks"><li>Link für eure Webseite, Google und Instagram</li><li>Bestätigung per Mail an den Gast, ganz automatisch</li><li>Bitte um Bewertung kurz nach dem Besuch</li></ul>
       </div>
-      <div class="stage-phone" aria-hidden="true">
-        <div class="blob" id="stage-blob" style="background:var(--mint)"></div>
-        <div class="phone"><div class="screen" id="stage-screen">
-          <img class="on" data-k="tische" src="img/app/tische.webp" alt="" width="640" height="1391">
-          <img data-k="reservieren" src="img/app/reservieren.webp" alt="" width="640" height="1391">
-          <img data-k="lager" src="img/app/lager.webp" alt="" width="640" height="1391">
-          <img data-k="mail" src="img/app/mail.webp" alt="" width="640" height="1391">
-          <img data-k="zahlen" src="img/app/zahlen.webp" alt="" width="640" height="1391">
-        </div></div>
+      <div class="stagebox peach rv d1" data-demo="book">
+        <div class="w" aria-hidden="true">
+          <div class="d">Tisch reservieren</div><small>Dein Restaurant · Nürnberg</small>
+          <p class="lab">Personen</p>
+          <div class="step"><span>−</span><b id="bk-n">2</b><span id="bk-plus">+</span></div>
+          <p class="lab">Tag</p>
+          <div class="chips"><span class="chip on">Heute</span><span class="chip">Morgen</span><span class="chip">Sa 14.11.</span></div>
+          <p class="lab">Uhrzeit</p>
+          <div class="chips" id="bk-times"><span class="chip">18:00</span><span class="chip">18:30</span><span class="chip">19:00</span><span class="chip" id="bk-t">19:30</span><span class="chip">20:00</span></div>
+          <span class="cta" id="bk-go">Reservieren</span>
+          <div class="done" id="bk-done"><div class="ok"><svg viewBox="0 0 24 24"><path d="M6 12.5l4 4L18 8" fill="none" stroke="#0D5A35" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="d">Reserviert!</div><small>Heute, 19:30 · 4 Personen<br>Die Bestätigung kommt per Mail.</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat flip">
+      <div class="rv">
+        <span class="tag mint">Tische live</span>
+        <h3>Kein Tisch bleibt aus Versehen „besetzt“.</h3>
+        <p class="lead">Jeder im Team sieht auf einen Blick, was los ist, auch ohne festen Platzierer am Eingang.</p>
+        <ul class="checks"><li>Timer an jedem Tisch, Farbe und Text zusammen</li><li>Hinweis, wenn Gäste sitzen und noch niemand da war</li><li>Hinweis, wenn ein Tisch frei, aber nicht abgeräumt ist</li></ul>
+      </div>
+      <div class="stagebox mint rv d1" data-demo="tiles">
+        <div class="w" aria-hidden="true">
+          <div class="row"><span class="d">Tische</span><small id="tl-c">4 von 6 belegt</small></div>
+          <div class="tiles3" id="tl">
+            <div class="occ"><span class="n">1</span><span data-min="12">12 Min</span></div>
+            <div class="free"><span class="n">2</span><span>Frei</span></div>
+            <div class="occ" id="tl3"><span class="n">3</span><span data-min="47">47 Min</span></div>
+            <div class="alarm" id="tl4"><span class="n">4</span><span>Niemand da</span></div>
+            <div class="occ"><span class="n">5</span><span data-min="25">25 Min</span></div>
+            <div class="free" id="tl6"><span class="n">6</span><span>Frei</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat">
+      <div class="rv">
+        <span class="tag lavender">Lager</span>
+        <h3>Inventur mit ein paar Tipps.</h3>
+        <p class="lead">Getrennt nach Bar, warmer Küche, Sushi und Theke. Zählen, eintippen, weiter. Was knapp wird, seht ihr sofort.</p>
+        <ul class="checks"><li>Große Zahlen, Ziffernfeld, ein Artikel nach dem anderen</li><li>„Läuft bald ab“ und „Nachbestellen“ auf einen Blick</li><li>Mehrere Lieferanten, eine Einkaufsliste</li></ul>
+      </div>
+      <div class="stagebox lavender rv d1" data-demo="count">
+        <div class="w" aria-hidden="true">
+          <div class="row"><span class="d">Inventur Sushi</span><small id="ct-k">3 von 8</small></div>
+          <div class="prog"><i id="ct-p"></i></div>
+          <p class="lab" id="ct-name" style="text-align:center;font-size:15px;color:var(--text)">Lachs in Sushi-Qualität</p>
+          <div class="big"><span id="ct-v">0</span> <span style="font-size:26px;color:var(--muted)" id="ct-u">kg</span></div>
+          <div class="keys" id="ct-keys"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>,</span><span>0</span><span>⌫</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat flip">
+      <div class="rv">
+        <span class="tag butter">Fehlliste</span>
+        <h3>Jede Woche, was fehlt. Als PDF.</h3>
+        <p class="lead">Tag und Uhrzeit wählt ihr selbst. Ist nichts offen, kommt auch keine Mail.</p>
+        <ul class="checks"><li>Einkaufsliste als PDF, sortiert nach Lieferant</li><li>Bestellung als Entwurf an den Lieferanten</li></ul>
+      </div>
+      <div class="stagebox butter rv d1" data-demo="pdf">
+        <div class="pdf" aria-hidden="true">
+          <div class="hd"><span class="d">Fehlliste KW 46</span><span>PDF</span></div>
+          <p class="sup">Großhandel</p>
+          <div class="ln"><span>Hähnchenbrust</span><b>12 kg</b></div>
+          <div class="ln"><span>Jasmintee</span><b>5 Pck</b></div>
+          <div class="ln"><span>Noriblätter</span><b>8 Pck</b></div>
+          <p class="sup">Frische-Kontor</p>
+          <div class="ln"><span>Limetten</span><b>4 kg</b></div>
+          <div class="ln"><span>Paprika</span><b>8 kg</b></div>
+          <p class="sup">Fischhandel</p>
+          <div class="ln"><span>Lachs, Sushi-Qualität</span><b>6 kg</b></div>
+        </div>
+        <div class="mail" id="pdf-mail" aria-hidden="true"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#654A00" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></i><div><b>Fehlliste verschickt</b><small>Freitag, 08:00 · an den Inhaber</small></div></div>
+      </div>
+    </div>
+
+    <div class="feat">
+      <div class="rv">
+        <span class="tag sky">Zahlen</span>
+        <h3>Wisst, wann es voll wird.</h3>
+        <p class="lead">Stoßzeiten, Sitzdauer und beliebteste Tische aus eurem echten Betrieb, für die Planung am Wochenende.</p>
+        <ul class="checks"><li>Wie viele Kellner die vollste Stunde braucht</li><li>Welche Tische zuerst weg sind</li></ul>
+      </div>
+      <div class="stagebox sky rv d1" data-demo="heat">
+        <div class="w" aria-hidden="true">
+          <div class="row"><span class="d">Stoßzeiten</span><small>12–23 Uhr</small></div>
+          <div class="heat" id="heat"></div>
+          <div class="peak" id="peak"><span>Fr 19–20 Uhr</span>am vollsten · 2 Kellner einplanen</div>
+        </div>
       </div>
     </div>
   </div>
@@ -340,37 +527,37 @@ footer a:hover{color:var(--text)}
 
 <section style="padding-top:24px">
   <div class="wrap">
-    <p class="kicker">Gemacht für den Service</p>
-    <h2>Ruhig, klar, schnell.</h2>
+    <p class="kicker rv">Gemacht für den Service</p>
+    <h2 class="rv">Ruhig, klar, schnell.</h2>
     <div class="tiles">
-      <div class="tile mint wide"><img src="img/ill/restaurant.webp" alt="" loading="lazy" width="92" height="92"><h3>Alle Geräte gleich</h3><p>Tablet am Pass, Handy in der Schürze: Jeder sieht denselben Stand.</p></div>
-      <div class="tile peach"><img src="img/ill/pin.webp" alt="" loading="lazy" width="92" height="92"><h3>Kein Portal</h3><p>Eure Gäste buchen bei euch, nicht bei einer Plattform.</p></div>
-      <div class="tile butter"><img src="img/ill/dumplings.webp" alt="" loading="lazy" width="92" height="92"><h3>Karte selbst ändern</h3><p>Specials und die neue Saisonkarte pflegt ihr selbst.</p></div>
-      <div class="tile lavender wide"><img src="img/ill/onigiri.webp" alt="" loading="lazy" width="92" height="92"><h3>Wenig tippen</h3><p>Große Knöpfe, klare Wörter, das Wichtige unten am Daumen.</p></div>
+      <div class="tile mint wide rv"><img src="img/ill/restaurant.webp" alt="" loading="lazy" width="96" height="96"><h3>iPad am Pass, iPhone in der Schürze</h3><p>Alle Geräte zeigen denselben Stand, sofort. Am besten aufs iPad, auf dem iPhone geht alles genauso.</p></div>
+      <div class="tile peach rv d1"><img src="img/ill/pin.webp" alt="" loading="lazy" width="96" height="96"><h3>Kein Portal</h3><p>Eure Gäste buchen bei euch, nicht bei einer Plattform.</p></div>
+      <div class="tile butter rv"><img src="img/ill/dumplings.webp" alt="" loading="lazy" width="96" height="96"><h3>Karte selbst ändern</h3><p>Specials und die neue Saisonkarte pflegt ihr selbst.</p></div>
+      <div class="tile lavender wide rv d1"><img src="img/ill/onigiri.webp" alt="" loading="lazy" width="96" height="96"><h3>Wenig tippen</h3><p>Große Knöpfe, klare Wörter, das Wichtige unten am Daumen.</p></div>
     </div>
   </div>
 </section>
 
 <section id="pakete" style="background:var(--surface)">
   <div class="wrap">
-    <p class="kicker">Pakete</p>
-    <h2>Klein anfangen, später erweitern.</h2>
-    <p class="lead">Jedes Paket enthält das vorherige.</p>
+    <p class="kicker rv">Pakete</p>
+    <h2 class="rv">Klein anfangen, später erweitern.</h2>
+    <p class="lead rv">Jedes Paket enthält das vorherige.</p>
     <div class="plans">
-      <div class="plan">
+      <div class="plan rv">
         <div class="head"><span class="tag peach">Paket 1</span><img src="img/ill/pin.webp" alt="" loading="lazy" width="56" height="56"></div>
         <h3>Reservierung</h3>
         <p>Weg vom teuren Reservierungssystem.</p>
         <ul><li>Eigener Buchungslink</li><li>Alle Reservierungen in einer Liste</li><li>Einfacher Tischplan</li><li>Bestätigungs- und Bewertungs-Mail</li></ul>
       </div>
-      <div class="plan hl">
+      <div class="plan hl rv d1">
         <div class="head"><span class="tag mint">Paket 2</span><img src="img/ill/restaurant.webp" alt="" loading="lazy" width="56" height="56"></div>
         <h3>Tische live</h3>
         <p>Mehr Überblick im Service.</p>
         <ul><li>Timer an jedem Tisch</li><li>Hinweise bei wartenden Gästen und ungeräumten Tischen</li><li>Wer wird als Nächstes frei</li><li>Stoßzeiten und Schichtplanung</li></ul>
         <p class="plus">plus alles aus Reservierung</p>
       </div>
-      <div class="plan">
+      <div class="plan rv d2">
         <div class="head"><span class="tag lavender">Paket 3</span><img src="img/ill/dumplings.webp" alt="" loading="lazy" width="56" height="56"></div>
         <h3>Komplett</h3>
         <p>Alles aus einer Hand.</p>
@@ -378,27 +565,33 @@ footer a:hover{color:var(--text)}
         <p class="plus">plus alles aus Tische live</p>
       </div>
     </div>
-    <p class="note">Preise besprechen wir mit euch persönlich. Pilotrestaurants in Nürnberg begleiten wir beim Start.</p>
+    <p class="note rv">Preise besprechen wir mit euch persönlich. Pilotrestaurants in Nürnberg begleiten wir beim Start.</p>
   </div>
 </section>
 
 <section id="gaeste">
   <div class="wrap">
-    <div class="guest">
-      <div class="txt">
-        <span class="tag" style="background:#fff;color:var(--rose-ink)">Bald für eure Gäste</span>
-        <h2 style="margin-top:16px">Eure Gäste wissen schneller, was sie bestellen.</h2>
+    <div class="feat flip" style="padding-top:0">
+      <div class="rv">
+        <span class="tag rose">Bald für eure Gäste</span>
+        <h3>Eure Gäste wissen schneller, was sie bestellen.</h3>
         <p class="lead">Geschmack und Allergien einmal angeben, dann zeigt Tablevo drei klare Empfehlungen aus eurer aktuellen Karte.</p>
-        <ul class="checks">
-          <li>Allergien und Ernährung sind feste Grenzen, nie nur ein Hinweis</li>
-          <li>Empfehlungen kommen direkt aus eurer Karte</li>
-          <li>Tisch reservieren mit einem Tipp</li>
-        </ul>
+        <ul class="checks"><li>Allergien und Ernährung sind feste Grenzen, nie nur ein Hinweis</li><li>Empfehlungen kommen direkt aus eurer Karte</li><li>Tisch reservieren mit einem Tipp</li></ul>
       </div>
-      <div class="guest-visual">
-        <img class="float a" src="img/ill/onigiri.webp" alt="" loading="lazy" width="120" height="120">
-        <img class="float b" src="img/ill/dumplings.webp" alt="" loading="lazy" width="110" height="110">
-        <div class="phone"><div class="screen"><img class="on" src="img/app/gast.webp" alt="Taste-Karte eines Gastes: Geschmacksprofil Süß-sauer und Frisch" loading="lazy" width="640" height="1391"></div></div>
+      <div class="stagebox rose rv d1" data-demo="taste">
+        <div class="w" aria-hidden="true">
+          <small style="font-weight:800;letter-spacing:.1em;color:var(--rose-ink)">DEINE TASTE-KARTE</small>
+          <div class="d" style="color:var(--rose-ink);margin-top:4px">Süß-sauer &amp; Frisch</div>
+          <svg class="radar" id="radar" viewBox="-36 0 332 240">
+            <g class="web"><polygon points="130,30 208,75 208,165 130,210 52,165 52,75"/><polygon points="130,60 182,90 182,150 130,180 78,150 78,90"/><polygon points="130,90 156,105 156,135 130,150 104,135 104,105"/><path d="M130 30V210M52 75L208 165M208 75L52 165"/></g>
+            <polygon class="shape" points="130,70 178,92 200,160 130,175 72,148 66,82"/>
+            <text x="130" y="22" text-anchor="middle">Scharf</text><text x="214" y="72">Würzig</text><text x="214" y="170">Süß-sauer</text><text x="130" y="230" text-anchor="middle">Frisch</text><text x="46" y="170" text-anchor="end">Reichhaltig</text><text x="46" y="72" text-anchor="end">Umami</text>
+          </svg>
+          <div class="recs">
+            <div class="rec" style="background:var(--peach);color:var(--peach-ink)"><span class="m">passt am besten</span><b>Crispy Salmon Roll</b><small>Würzig und knusprig</small></div>
+            <div class="rec" style="background:var(--sky);color:var(--sky-ink)"><span class="m">etwas Neues</span><b>Yuzu-Ceviche</b><small>Frisch und leicht säuerlich</small></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -406,14 +599,14 @@ footer a:hover{color:var(--text)}
 
 <section class="end" id="kontakt">
   <div class="wrap">
-    <img class="icon" src="img/apple-touch-icon.png" alt="" width="96" height="96">
-    <p class="kicker">Bald im App Store</p>
-    <h2>Bereit für einen ruhigeren Service?</h2>
-    <p class="lead">Wir suchen Restaurants in Nürnberg, die Tablevo mit uns im echten Betrieb testen. Schreibt uns kurz, wir melden uns.</p>
-    <div class="ctas" id="end-ctas">
+    <img class="icon rv" src="img/apple-touch-icon.png" alt="" width="96" height="96">
+    <p class="kicker rv">Bald im App Store · für iPad und iPhone</p>
+    <h2 class="rv">Bereit für einen ruhigeren Service?</h2>
+    <p class="lead rv">Wir suchen Restaurants in Nürnberg, die Tablevo mit uns im echten Betrieb testen. Schreibt uns kurz, wir melden uns.</p>
+    <div class="ctas rv" id="end-ctas">
       <a class="btn" href="mailto:hello@torchtechnology.de?subject=Tablevo%20testen">Pilotrestaurant werden</a>
       <span class="soon" aria-label="Bald im App Store">
-        <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="#D3F4E1"/><path d="M13 7v6l4 2.5" fill="none" stroke="#0D5A35" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="#D3F4E1"/><path class="hand" d="M13 13V7.5" stroke="#0D5A35" stroke-width="2.2" stroke-linecap="round"/><path d="M13 13l3.5 2" stroke="#0D5A35" stroke-width="2.2" stroke-linecap="round"/></svg>
         <span><small>Bald im</small><b>App Store</b></span>
       </span>
     </div>
@@ -426,7 +619,7 @@ footer a:hover{color:var(--text)}
   <div class="wrap">
     <span>© 2026 TORCHTECHNOLOGY LTD</span>
     <nav><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="mailto:hello@torchtechnology.de">Kontakt</a></nav>
-    <span style="flex-basis:100%;font-size:12px">App-Screens mit Beispieldaten.</span>
+    <span style="flex-basis:100%;font-size:12px">App-Ansichten nachgezeichnet, mit Beispielinhalten.</span>
   </div>
 </footer>
 
@@ -437,22 +630,110 @@ footer a:hover{color:var(--text)}
 </div>
 
 <script>
-const nav=document.getElementById('nav'), bar=document.getElementById('getbar');
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const tap=async el=>{el.classList.remove('tap');void el.offsetWidth;el.classList.add('tap');await wait(450)};
 
-// Leiste unten (Handy): nur zeigen, wenn weder die Knöpfe oben noch unten zu sehen sind.
-const seen=new Set();
+// Balken, Leiste unten
+const nav=$('#nav'), bar=$('#getbar'), seen=new Set();
 const update=()=>{nav.classList.toggle('solid',scrollY>8);bar.classList.toggle('on',seen.size===0&&scrollY>200)};
 const ioCta=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?seen.add(e.target):seen.delete(e.target));update()});
-['hero-ctas','end-ctas'].forEach(id=>ioCta.observe(document.getElementById(id)));
+['#hero-ctas','#end-ctas'].forEach(s=>ioCta.observe($(s)));
 addEventListener('scroll',update,{passive:true});update();
 
-// Bühne (ab 960 px): das Kapitel in der Bildschirmmitte bestimmt den Screen im stehenden Telefon.
-const chs=[...document.querySelectorAll('.ch')], imgs=[...document.querySelectorAll('#stage-screen img')], blob=document.getElementById('stage-blob');
-const ioStage=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
-  chs.forEach(c=>c.classList.toggle('on',c===e.target));
-  imgs.forEach(i=>i.classList.toggle('on',i.dataset.k===e.target.dataset.shot));
-  blob.style.background=e.target.dataset.blob;})},{rootMargin:'-45% 0px -45% 0px'});
-chs.forEach(c=>ioStage.observe(c)); chs[0].classList.add('on');
+// Erscheinen beim Scrollen
+const ioRv=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ioRv.unobserve(e.target)}}),{rootMargin:'0px 0px -8% 0px'});
+$$('.rv').forEach(el=>ioRv.observe(el));
+
+// iPad-Bildschirm auf die Breite skalieren
+const fit=()=>$$('.ipad .screen').forEach(s=>s.firstElementChild.style.setProperty('--s',s.clientWidth/1180));
+new ResizeObserver(fit).observe($('.ipad .screen'));fit();
+
+// Laufende Timer (im Zeitraffer: alle 4 s eine Minute)
+const fmt=m=>m<60?m+' Min':Math.floor(m/60)+':'+String(m%60).padStart(2,'0')+' h';
+if(!still)setInterval(()=>$$('[data-min]').forEach(el=>{const m=+el.dataset.min+1;el.dataset.min=m;el.textContent=fmt(m)}),4000);
+
+// Demos laufen nur, solange sie zu sehen sind
+const visible=new Map();
+const ioDemo=new IntersectionObserver(es=>es.forEach(e=>{visible.set(e.target,e.isIntersecting);if(e.isIntersecting)start(e.target)}),{threshold:.35});
+const running=new Set();
+async function start(el){if(running.has(el)||still)return;running.add(el);const f=demos[el.dataset.demo];
+  while(visible.get(el)){await f(el)}running.delete(el)}
+
+const setT=(id,cls,txt)=>{const t=$(id);t.className='t '+cls+(t.classList.contains('round')?' round':'');t.querySelector('.s').textContent=txt;t.querySelector('.s').removeAttribute('data-min');t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),300)};
+const demos={
+  async floor(){
+    const toast=$('#toast'),say=async t=>{$('#toast-t').textContent=t;toast.classList.add('on');await wait(1700);toast.classList.remove('on')};
+    await wait(1600);
+    await tap($('#br1'));$('#r1').classList.add('out');setT('#t1','occ','0 Min');$('#f-occ').textContent='6';$('#f-res').textContent='5';await say('Yilmaz sitzt an Tisch 1');
+    await wait(900);
+    await tap($('#b5'));$('#a5').classList.add('gone');setT('#t5','occ','8 Min');await say('Tisch 5: Service war da');
+    await wait(900);
+    await tap($('#b4'));$('#a4').classList.add('gone');setT('#t4','clean','Reinigen');$('#f-occ').textContent='5';
+    await wait(2200);
+    setT('#t4','free','Frei');await say('Tisch 4 ist wieder frei');
+    await wait(2600);
+    // zurück auf Anfang
+    $('#r1').classList.remove('out');$('#a5').classList.remove('gone');$('#a4').classList.remove('gone');
+    setT('#t1','free','Frei');setT('#t4','alarm','Noch da?');setT('#t5','alarm','Niemand da');$('#f-occ').textContent='5';$('#f-res').textContent='6';
+    await wait(1200);
+  },
+  async book(el){
+    const n=$('#bk-n'),t=$('#bk-t'),d=$('#bk-done');
+    n.textContent='2';$$('#bk-times .chip').forEach(c=>c.classList.remove('on'));d.classList.remove('on');
+    await wait(900);for(const v of [3,4]){await tap($('#bk-plus'));n.textContent=v;await wait(350)}
+    await wait(300);await tap(t);t.classList.add('on');await wait(700);
+    await tap($('#bk-go'));d.classList.add('on');await wait(2800);
+  },
+  async tiles(){
+    const c=$('#tl-c'),t3=$('#tl3'),t4=$('#tl4'),t6=$('#tl6');
+    const set=(el,cls,txt)=>{el.className=cls;el.lastElementChild.textContent=txt;el.lastElementChild.removeAttribute('data-min')};
+    await wait(1400);await tap(t4);set(t4,'occ','Service war da');await wait(1600);set(t4,'occ','9 Min');
+    await wait(900);set(t3,'clean','Reinigen');c.textContent='3 von 6 belegt';await wait(1800);
+    await tap(t3);set(t3,'free','Frei');await wait(1200);
+    await tap(t6);set(t6,'occ','0 Min');c.textContent='4 von 6 belegt';await wait(2200);
+    set(t3,'occ','47 Min');t3.lastElementChild.dataset.min=47;set(t4,'alarm','Niemand da');set(t6,'free','Frei');await wait(600);
+  },
+  async count(){
+    const items=[['Lachs in Sushi-Qualität','1,5','kg'],['Noriblätter','8','Pck'],['Sushi-Reis','18','kg']];
+    const keys=$$('#ct-keys span'),v=$('#ct-v');
+    for(let i=0;i<items.length;i++){const [name,val,u]=items[i];
+      $('#ct-name').textContent=name;$('#ct-u').textContent=u;$('#ct-k').textContent=(3+i)+' von 8';$('#ct-p').style.width=((3+i)/8*100)+'%';
+      v.textContent='0';await wait(700);let s='';
+      for(const ch of val){const k=keys.find(k=>k.textContent===ch);k.classList.add('hit');await tap(k);k.classList.remove('hit');s+=ch;v.textContent=s;await wait(160)}
+      await wait(1100)}
+    await wait(600);
+  },
+  async pdf(){
+    const ls=$$('.pdf .ln'),m=$('#pdf-mail');ls.forEach(l=>l.classList.remove('on'));m.classList.remove('on');
+    await wait(600);for(const l of ls){l.classList.add('on');await wait(380)}
+    await wait(500);m.classList.add('on');await wait(3200);
+  },
+  async heat(){
+    const h=$('#heat');
+    if(!h.children.length){const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
+      // Beispielwerte: Mittag und Abend voll, Fr/Sa abends am vollsten
+      days.forEach((d,di)=>{const b=document.createElement('b');b.textContent=d;h.append(b);
+        for(let hr=12;hr<24;hr++){const lunch=hr>=12&&hr<=14?.55:0, eve=hr>=18&&hr<=21?(.55+(di>=4&&di<=5?.4:0)):0, x=Math.min(1,Math.max(.12,lunch+eve+(hr==22?.2:0)));
+          const i=document.createElement('i');i.style.background=`rgba(19,71,118,${(.12+x*.8).toFixed(2)})`;h.append(i)}})}
+    const cells=[...h.querySelectorAll('i')],p=$('#peak');cells.forEach(c=>c.classList.remove('on'));p.classList.remove('on');
+    await wait(400);for(let i=0;i<cells.length;i+=3){cells.slice(i,i+3).forEach(c=>c.classList.add('on'));await wait(28)}
+    await wait(400);p.classList.add('on');await wait(3600);
+  },
+  async taste(){
+    const r=$('#radar'),recs=$$('.rec');r.classList.remove('on');recs.forEach(x=>x.classList.remove('on'));
+    await wait(500);r.classList.add('on');await wait(1100);for(const x of recs){x.classList.add('on');await wait(450)}
+    await wait(3600);
+  }
+};
+$('#floor').dataset.demo='floor';ioDemo.observe($('#floor'));
+$$('[data-demo]').forEach(el=>ioDemo.observe(el));
+// Ohne Bewegung: Endzustände zeigen
+if(still){$('#bk-n').textContent='4';$('#bk-t').classList.add('on');$$('.pdf .ln').forEach(l=>l.classList.add('on'));$('#pdf-mail').classList.add('on');
+  $('#radar').classList.add('on');$$('.rec').forEach(x=>x.classList.add('on'));$('#ct-v').textContent='1,5';$('#ct-p').style.width='37%';demos.heat().catch(()=>{});}
+})();
 </script>
 </body>
 </html>
